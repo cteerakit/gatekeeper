@@ -1,0 +1,16 @@
+
+C:\Users\cteer\Projects\gatekeeper\src\App.tsx
+  38:6   warning  React Hook useEffect has a missing dependency: 'refresh'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  52:14  error    'error' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+  52:21  error    Unexpected any. Specify a different type                                                                    @typescript-eslint/no-explicit-any
+
+C:\Users\cteer\Projects\gatekeeper\src\components\MultiStepPostForm.tsx
+   54:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  147:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  181:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  222:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  240:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  277:66  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 9 problems (8 errors, 1 warning)
+

@@ -1,0 +1,84 @@
+{
+    "common": {
+        "app_name": "Gatekeeper",
+        "app_subtitle": "Facebook Group Post Approval Orchestrator",
+        "admin_mode": "Admin Mode",
+        "member_mode": "Member Mode",
+        "sign_out": "Sign Out",
+        "login_facebook": "Login with Facebook",
+        "loading": "Loading..."
+    },
+    "landing": {
+        "title": "Streamline Group Approvals",
+        "subtitle": "The dedicated gateway for members to submit high-quality content for group moderation.",
+        "get_started": "Get Started Now"
+    },
+    "form": {
+        "submit_new_post": "Submit New Post",
+        "description": "Draft your post. Admin will review before publishing.",
+        "active_context": "Active Context",
+        "group_name": "React Enthusiasts Worldwide",
+        "description_label": "Description",
+        "placeholder": "Share something interesting with the community...",
+        "visual_assets": "Visual Assets",
+        "submit_button": "Submit for Approval",
+        "processing": "Processing Submission...",
+        "validation_min_length": "Post content must be at least 10 characters.",
+        "step_1": "Choose Group",
+        "step_2": "Choose Post Type",
+        "step_3": "Post Detail",
+        "step_4": "Add-ons",
+        "step_5": "Summary & Payment",
+        "step_6": "Success",
+        "select_group": "Select a Facebook Group to post to",
+        "groups": {
+            "react": "React Developers",
+            "frontend": "Frontend Masters",
+            "uiux": "UI/UX Design Community"
+        },
+        "post_type": "Select the type of post",
+        "types": {
+            "job": "Job Post",
+            "job_desc": "Hiring for a new role",
+            "sponsored": "Sponsored Post",
+            "sponsored_desc": "Promote your product or service",
+            "general": "General Post",
+            "general_desc": "Regular community discussion"
+        },
+        "post_link": "Post Link (Optional)",
+        "addons": "Select additional features",
+        "pin_post": "Pin Post",
+        "pin_post_desc": "Keep your post at the top of the group for 7 days",
+        "summary": "Review your submission",
+        "total": "Total Amount",
+        "pay_and_submit": "Pay & Submit",
+        "success_title": "Submission Successful!",
+        "success_desc": "Your post has been submitted and is pending admin approval.",
+        "back_to_dashboard": "Back to Dashboard",
+        "next": "Next Step",
+        "back": "Go Back"
+    },
+    "dashboard": {
+        "approval_queue": "Approval Queue",
+        "submission_history": "Submission History",
+        "admin_description": "Review and moderate pending requests.",
+        "member_description": "Track the live status of your group requests.",
+        "content_overview": "Content Overview",
+        "submitted": "Submitted",
+        "management": "Management",
+        "no_results": "No results found.",
+        "attachments": "{{count}} attachment(s)",
+        "approve": "Approve",
+        "reject": "Reject",
+        "status_approved": "approved",
+        "status_pending": "pending",
+        "status_rejected": "rejected"
+    },
+    "notifications": {
+        "submit_success": "Request submitted for approval!",
+        "submit_failed": "Failed to submit request",
+        "post_approved": "Post approved!",
+        "post_rejected": "Post rejected!",
+        "update_failed": "Failed to update status"
+    }
+}
