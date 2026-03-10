@@ -23,6 +23,14 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 function App() {
   const { t, i18n } = useTranslation()
@@ -80,32 +88,43 @@ function App() {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <LanguageSwitcher />
-
-            {user && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAdminMode(!isAdminMode)}
-                className={cn(
-                  "transition-all bg-white",
-                  isAdminMode ? "bg-primary/10 text-primary border-primary/50" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {isAdminMode ? <Shield className="w-4 h-4 mr-2" /> : <User className="w-4 h-4 mr-2" />}
-                {isAdminMode ? t("common.admin_mode") : t("common.member_mode")}
-              </Button>
-            )}
-
-            {user ? (
-              <Button variant="ghost" size="sm" onClick={signOut} className="text-muted-foreground hover:text-foreground hover:bg-muted bg-white border">
-                <LogOut className="w-4 h-4 mr-2" />
-                {t("common.sign_out")}
-              </Button>
+            {!user ? (
+              <>
+                <LanguageSwitcher />
+                <Button onClick={signInWithFacebook} className="bg-[#1877F2] hover:bg-[#1877F2]/90 text-white border-none shadow-xl px-6">
+                  {t("common.login_facebook")}
+                </Button>
+              </>
             ) : (
-              <Button onClick={signInWithFacebook} className="bg-[#1877F2] hover:bg-[#1877F2]/90 text-white border-none shadow-xl px-6">
-                {t("common.login_facebook")}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="relative h-10 w-10 rounded-full hover:bg-neutral-100 flex items-center justify-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user.user_metadata?.avatar_url || user.user_metadata?.picture} alt={user.user_metadata?.full_name || "User"} />
+                    <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 shadow-xl" align="end">
+                  <div className="flex flex-col space-y-1 p-2">
+                    <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || user.email?.split('@')[0] || "User"}</p>
+                    <p className="text-xs leading-none text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <div className="px-2 py-1.5 flex flex-col gap-2">
+                    <p className="text-xs font-semibold text-muted-foreground">{t("common.language", "Language / ภาษา")}</p>
+                    <LanguageSwitcher />
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setIsAdminMode(!isAdminMode)} className="cursor-pointer">
+                    {isAdminMode ? <User className="w-4 h-4 mr-2" /> : <Shield className="w-4 h-4 mr-2" />}
+                    {isAdminMode ? t("common.member_mode", "Member Mode") : t("common.admin_mode", "Admin Mode")}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut} className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {t("common.sign_out")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>

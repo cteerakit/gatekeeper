@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form"
 import { Loader2, CheckCircle2, ChevronRight, ChevronLeft, Users, Briefcase, Megaphone, Check, Link as LinkIcon, Pin, CreditCard, Image as ImageIcon, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useGroups } from "@/hooks/useGroups"
 
 interface MultiStepPostFormProps {
     submitPost: (content: string, files: File[]) => Promise<void>
@@ -25,6 +26,7 @@ interface MultiStepPostFormProps {
 
 export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormProps) {
     const { t } = useTranslation()
+    const { groups, isLoading: isLoadingGroups } = useGroups()
     const [step, setStep] = useState(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [files, setFiles] = useState<FileList | null>(null)
@@ -72,8 +74,9 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
     const handleFinalSubmit = async (values: FormValues) => {
         setIsSubmitting(true)
         try {
+            const selectedGroup = groups.find(g => g.id === values.group)
             // In a real app we'd send all values. Here we combine some into the content.
-            const fullContent = `[${t(`form.groups.${values.group}`)}] [${t(`form.types.${values.type}`)}]\n\n${values.content}\n\n${values.link ? `Link: ${values.link}` : ""}`
+            const fullContent = `[${selectedGroup?.name || values.group}] [${t(`form.types.${values.type}`)}]\n\n${values.content}\n\n${values.link ? `Link: ${values.link}` : ""}`
             await submitPost(fullContent, files ? Array.from(files) : [])
             setStep(6) // Success step
         } catch (error) {
@@ -146,24 +149,33 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
                                     name="group"
                                     render={({ field }) => (
                                         <FormItem className="space-y-4">
-                                            {["react", "frontend", "uiux"].map((g) => (
+                                            {isLoadingGroups ? (
+                                                <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+                                            ) : groups.map((g) => (
                                                 <Card
-                                                    key={g}
+                                                    key={g.id}
                                                     className={cn(
-                                                        "cursor-pointer transition-all hover:border-primary/50 hover:bg-primary/5",
-                                                        field.value === g ? "border-primary bg-primary/5 ring-1 ring-primary" : ""
+                                                        "cursor-pointer transition-all hover:border-primary/50 hover:bg-primary/5 overflow-hidden",
+                                                        field.value === g.id ? "border-primary ring-1 ring-primary" : ""
                                                     )}
-                                                    onClick={() => form.setValue("group", g, { shouldValidate: true })}
+                                                    onClick={() => form.setValue("group", g.id, { shouldValidate: true })}
                                                 >
+                                                    {g.cover_url && (
+                                                        <div
+                                                            className="h-32 w-full bg-cover bg-center"
+                                                            style={{ backgroundImage: `url(${g.cover_url})` }}
+                                                        />
+                                                    )}
                                                     <CardContent className="p-4 flex items-center gap-4">
-                                                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                                            <Users className="w-5 h-5" />
-                                                        </div>
+                                                        {!g.cover_url && (
+                                                            <div className="w-10 h-10 rounded-full bg-primary/10 flex flex-shrink-0 items-center justify-center text-primary">
+                                                                <Users className="w-5 h-5" />
+                                                            </div>
+                                                        )}
                                                         <div className="flex-1">
-                                                            <h4 className="font-bold text-foreground">{t(`form.groups.${g}`)}</h4>
-                                                            <p className="text-xs text-muted-foreground">{t("form.group_name")} Network</p>
+                                                            <h4 className="font-bold text-foreground text-[15px] leading-tight line-clamp-2">{g.name}</h4>
                                                         </div>
-                                                        {field.value === g && <CheckCircle2 className="w-5 h-5 text-primary" />}
+                                                        {field.value === g.id && <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />}
                                                     </CardContent>
                                                 </Card>
                                             ))}
@@ -309,9 +321,9 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
                             {step === 5 && (
                                 <div className="space-y-6">
                                     <div className="rounded-xl border border-neutral-200 overflow-hidden text-sm">
-                                        <div className="bg-neutral-50 p-4 border-b flex justify-between items-center">
-                                            <span className="text-muted-foreground font-semibold uppercase tracking-wider text-xs">{t("form.step_1")}</span>
-                                            <span className="font-bold">{t(`form.groups.${form.getValues("group")}`)}</span>
+                                        <div className="bg-neutral-50 p-4 border-b flex justify-between items-center gap-4">
+                                            <span className="text-muted-foreground font-semibold uppercase tracking-wider text-xs flex-shrink-0">{t("form.step_1")}</span>
+                                            <span className="font-bold text-right line-clamp-1">{groups.find(g => g.id === form.getValues("group"))?.name}</span>
                                         </div>
                                         <div className="bg-white p-4 border-b flex justify-between items-center">
                                             <span className="text-muted-foreground font-semibold uppercase tracking-wider text-xs">{t("form.step_2")}</span>
