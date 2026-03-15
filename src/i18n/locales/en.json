@@ -6,11 +6,12 @@
         "member_mode": "Member Mode",
         "sign_out": "Sign Out",
         "login_facebook": "Login with Facebook",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "language": "Language"
     },
     "landing": {
         "title": "Streamline Group Approvals",
-        "subtitle": "The dedicated gateway for members to submit high-quality content for group moderation.",
+        "subtitle": "Gatekeeper is a job posting management system designed to elevate security within our Facebook groups.\n\nWe created this platform to filter for quality listings and verify poster identities with confidence. Our goal is to protect against scammers and ensure our members find the right job opportunities from truly trustworthy companies.",
         "get_started": "Get Started Now"
     },
     "form": {
@@ -24,8 +25,10 @@
         "submit_button": "Submit for Approval",
         "processing": "Processing Submission...",
         "validation_min_length": "Post content must be at least 10 characters.",
-        "step_1": "Choose Group",
-        "step_2": "Choose Post Type",
+        "validation_group_required": "Please select a group",
+        "validation_type_required": "Please select a post type",
+        "step_1": "Choose Post Type",
+        "step_2": "Choose Group",
         "step_3": "Post Detail",
         "step_4": "Add-ons",
         "step_5": "Summary & Payment",
@@ -41,9 +44,7 @@
             "job": "Job Post",
             "job_desc": "Hiring for a new role",
             "sponsored": "Sponsored Post",
-            "sponsored_desc": "Promote your product or service",
-            "general": "General Post",
-            "general_desc": "Regular community discussion"
+            "sponsored_desc": "Promote your product or service"
         },
         "post_link": "Post Link (Optional)",
         "addons": "Select additional features",
@@ -56,7 +57,11 @@
         "success_desc": "Your post has been submitted and is pending admin approval.",
         "back_to_dashboard": "Back to Dashboard",
         "next": "Next Step",
-        "back": "Go Back"
+        "back": "Go Back",
+        "free": "Free",
+        "secure_payment_notice": "Secure mock payment process",
+        "link_label": "Link:",
+        "post_type_free_note": "Other post types can be posted directly to the group for free."
     },
     "dashboard": {
         "approval_queue": "Approval Queue",

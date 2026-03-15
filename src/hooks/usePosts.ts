@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export interface Post {
@@ -13,7 +13,7 @@ export function usePosts() {
     const [posts, setPosts] = useState<Post[]>([])
     const [loading, setLoading] = useState(true)
 
-    const fetchPosts = async (all = false) => {
+    const fetchPosts = useCallback(async (all = false) => {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
@@ -35,7 +35,7 @@ export function usePosts() {
             setPosts(data || [])
         }
         setLoading(false)
-    }
+    }, [])
 
     useEffect(() => {
         fetchPosts()
@@ -51,7 +51,7 @@ export function usePosts() {
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [])
+    }, [fetchPosts])
 
     const submitPost = async (content: string, files: File[]) => {
         const { data: { user } } = await supabase.auth.getUser()
@@ -88,14 +88,15 @@ export function usePosts() {
         if (error) throw error
     }
 
-    const updatePostStatus = async (postId: string, status: 'approved' | 'rejected') => {
+    const updatePostStatus = useCallback(async (postId: string, status: 'approved' | 'rejected') => {
         const { error } = await supabase
             .from('posts')
             .update({ status })
             .eq('id', postId)
 
         if (error) throw error
-    }
+    }, [])
 
     return { posts, loading, submitPost, updatePostStatus, refresh: fetchPosts }
 }
+

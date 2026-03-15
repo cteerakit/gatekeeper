@@ -15,7 +15,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { Loader2, CheckCircle2, ChevronRight, ChevronLeft, Users, Briefcase, Megaphone, Check, Link as LinkIcon, Pin, CreditCard, Image as ImageIcon, FileText } from "lucide-react"
+import { Loader2, CheckCircle2, ChevronRight, ChevronLeft, Users, Briefcase, Megaphone, Check, Link as LinkIcon, Pin, CreditCard, Image as ImageIcon, Info, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useGroups } from "@/hooks/useGroups"
 
@@ -29,13 +29,12 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
     const { groups, isLoading: isLoadingGroups } = useGroups()
     const [step, setStep] = useState(1)
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [files, setFiles] = useState<FileList | null>(null)
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([])
 
     const formSchema = z.object({
-        group: z.string().min(1, { message: "Please select a group" }),
-        type: z.string().min(1, { message: "Please select a post type" }),
+        group: z.string().min(1, { message: t("form.validation_group_required") }),
+        type: z.string().min(1, { message: t("form.validation_type_required") }),
         content: z.string().min(10, { message: t("form.validation_min_length") }),
-        link: z.string().optional(),
         pinPost: z.boolean(),
     })
 
@@ -47,15 +46,14 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
             group: "",
             type: "",
             content: "",
-            link: "",
             pinPost: false,
         },
     })
 
     const nextStep = () => {
         const fieldsToValidate: Record<number, (keyof FormValues)[]> = {
-            1: ["group"],
-            2: ["type"],
+            1: ["type"],
+            2: ["group"],
             3: ["content"],
             4: ["pinPost"],
         }
@@ -76,8 +74,8 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
         try {
             const selectedGroup = groups.find(g => g.id === values.group)
             // In a real app we'd send all values. Here we combine some into the content.
-            const fullContent = `[${selectedGroup?.name || values.group}] [${t(`form.types.${values.type}`)}]\n\n${values.content}\n\n${values.link ? `Link: ${values.link}` : ""}`
-            await submitPost(fullContent, files ? Array.from(files) : [])
+            const fullContent = `[${selectedGroup?.name || values.group}] [${t(`form.types.${values.type}`)}]\n\n${values.content}`
+            await submitPost(fullContent, selectedFiles)
             setStep(6) // Success step
         } catch (error) {
             console.error(error)
@@ -88,7 +86,7 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
 
     const handleReset = () => {
         form.reset()
-        setFiles(null)
+        setSelectedFiles([])
         setStep(1)
         if (onSuccess) {
             onSuccess();
@@ -129,8 +127,8 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
                         {t(`form.step_${step}`)}
                     </CardTitle>
                     <CardDescription className="text-sm">
-                        {step === 1 && t("form.select_group")}
-                        {step === 2 && t("form.post_type")}
+                        {step === 1 && t("form.post_type")}
+                        {step === 2 && t("form.select_group")}
                         {step === 3 && t("form.description")}
                         {step === 4 && t("form.addons")}
                         {step === 5 && t("form.summary")}
@@ -142,51 +140,8 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
                 <form onSubmit={form.handleSubmit(handleFinalSubmit)} className="flex flex-col">
                     <CardContent className="p-6">
                         <div className="min-h-[300px] animate-in slide-in-from-right-4 fade-in duration-300">
-                            {/* Step 1: Choose Group */}
+                            {/* Step 1: Choose Post Type */}
                             {step === 1 && (
-                                <FormField
-                                    control={form.control}
-                                    name="group"
-                                    render={({ field }) => (
-                                        <FormItem className="space-y-4">
-                                            {isLoadingGroups ? (
-                                                <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
-                                            ) : groups.map((g) => (
-                                                <Card
-                                                    key={g.id}
-                                                    className={cn(
-                                                        "cursor-pointer transition-all hover:border-primary/50 hover:bg-primary/5 overflow-hidden",
-                                                        field.value === g.id ? "border-primary ring-1 ring-primary" : ""
-                                                    )}
-                                                    onClick={() => form.setValue("group", g.id, { shouldValidate: true })}
-                                                >
-                                                    {g.cover_url && (
-                                                        <div
-                                                            className="h-32 w-full bg-cover bg-center"
-                                                            style={{ backgroundImage: `url(${g.cover_url})` }}
-                                                        />
-                                                    )}
-                                                    <CardContent className="p-4 flex items-center gap-4">
-                                                        {!g.cover_url && (
-                                                            <div className="w-10 h-10 rounded-full bg-primary/10 flex flex-shrink-0 items-center justify-center text-primary">
-                                                                <Users className="w-5 h-5" />
-                                                            </div>
-                                                        )}
-                                                        <div className="flex-1">
-                                                            <h4 className="font-bold text-foreground text-[15px] leading-tight line-clamp-2">{g.name}</h4>
-                                                        </div>
-                                                        {field.value === g.id && <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />}
-                                                    </CardContent>
-                                                </Card>
-                                            ))}
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            )}
-
-                            {/* Step 2: Choose Post Type */}
-                            {step === 2 && (
                                 <FormField
                                     control={form.control}
                                     name="type"
@@ -194,8 +149,7 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
                                         <FormItem className="grid gap-4 md:grid-cols-2">
                                             {[
                                                 { id: "job", icon: Briefcase },
-                                                { id: "sponsored", icon: Megaphone },
-                                                { id: "general", icon: FileText }
+                                                { id: "sponsored", icon: Megaphone }
                                             ].map((tItem) => (
                                                 <Card
                                                     key={tItem.id}
@@ -219,7 +173,53 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
                                                     </CardContent>
                                                 </Card>
                                             ))}
+                                            
+                                            <div className="col-span-full mt-2 p-4 bg-muted/30 border border-neutral-200 rounded-xl text-muted-foreground text-sm flex items-start gap-3">
+                                                <div className="w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                                    <Info className="w-3 h-3 text-primary" />
+                                                </div>
+                                                <p>{t("form.post_type_free_note")}</p>
+                                            </div>
+
                                             <FormMessage className="col-span-full" />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+
+                            {/* Step 2: Choose Group */}
+                            {step === 2 && (
+                                <FormField
+                                    control={form.control}
+                                    name="group"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-4">
+                                            {isLoadingGroups ? (
+                                                <div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
+                                            ) : groups.map((g) => (
+                                                <Card
+                                                    key={g.id}
+                                                    className={cn(
+                                                        "cursor-pointer transition-all hover:border-primary/50 hover:bg-neutral-50 border-neutral-200",
+                                                        field.value === g.id ? "border-primary ring-1 ring-primary bg-primary/5" : ""
+                                                    )}
+                                                    onClick={() => form.setValue("group", g.id, { shouldValidate: true })}
+                                                >
+                                                    <CardContent className="p-4 flex items-center gap-4">
+                                                        <div className={cn(
+                                                            "w-10 h-10 rounded-full flex flex-shrink-0 items-center justify-center transition-colors",
+                                                            field.value === g.id ? "bg-primary text-white" : "bg-primary/10 text-primary"
+                                                        )}>
+                                                            <Users className="w-5 h-5" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <h4 className="font-bold text-foreground text-[15px] leading-tight">{g.name}</h4>
+                                                        </div>
+                                                        {field.value === g.id && <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />}
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
@@ -246,37 +246,45 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
                                         )}
                                     />
 
-                                    <FormField
-                                        control={form.control}
-                                        name="link"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="text-xs text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-2">
-                                                    <LinkIcon className="w-3 h-3" /> {t("form.post_link")}
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="https://..."
-                                                        className="bg-white transition-all focus-visible:ring-primary/50"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-2">
+                                                <ImageIcon className="w-3 h-3" /> {t("form.visual_assets")}
+                                            </label>
+                                            <Input
+                                                type="file"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={(e) => {
+                                                    if (e.target.files) {
+                                                        setSelectedFiles(prev => [...prev, ...Array.from(e.target.files!)])
+                                                    }
+                                                }}
+                                                className="bg-white cursor-pointer py-2 h-10 file:bg-primary/10 file:text-primary file:font-semibold file:border-0 file:rounded-md file:px-3 file:mr-4 hover:file:bg-primary/20 transition-all text-sm"
+                                            />
+                                        </div>
 
-                                    <div className="space-y-2">
-                                        <label className="text-xs text-muted-foreground font-bold uppercase tracking-widest flex items-center gap-2">
-                                            <ImageIcon className="w-3 h-3" /> {t("form.visual_assets")}
-                                        </label>
-                                        <Input
-                                            type="file"
-                                            accept="image/*"
-                                            multiple
-                                            onChange={(e) => setFiles(e.target.files)}
-                                            className="bg-white cursor-pointer py-2 h-10 file:bg-primary/10 file:text-primary file:font-semibold file:border-0 file:rounded-md file:px-3 file:mr-4 hover:file:bg-primary/20 transition-all text-sm"
-                                        />
+                                        {selectedFiles.length > 0 && (
+                                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 p-3 bg-neutral-50 rounded-xl border border-dashed border-neutral-300">
+                                                {selectedFiles.map((file, idx) => (
+                                                    <div key={`${file.name}-${idx}`} className="relative group aspect-square rounded-lg overflow-hidden border border-neutral-200 bg-white">
+                                                        <img 
+                                                            src={URL.createObjectURL(file)} 
+                                                            alt="preview" 
+                                                            className="w-full h-full object-cover"
+                                                            onLoad={(e) => URL.revokeObjectURL((e.target as HTMLImageElement).src)}
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== idx))}
+                                                            className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -323,11 +331,11 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
                                     <div className="rounded-xl border border-neutral-200 overflow-hidden text-sm">
                                         <div className="bg-neutral-50 p-4 border-b flex justify-between items-center gap-4">
                                             <span className="text-muted-foreground font-semibold uppercase tracking-wider text-xs flex-shrink-0">{t("form.step_1")}</span>
-                                            <span className="font-bold text-right line-clamp-1">{groups.find(g => g.id === form.getValues("group"))?.name}</span>
+                                            <span className="font-bold">{t(`form.types.${form.getValues("type")}`)}</span>
                                         </div>
                                         <div className="bg-white p-4 border-b flex justify-between items-center">
                                             <span className="text-muted-foreground font-semibold uppercase tracking-wider text-xs">{t("form.step_2")}</span>
-                                            <span className="font-bold">{t(`form.types.${form.getValues("type")}`)}</span>
+                                            <span className="font-bold text-right line-clamp-1">{groups.find(g => g.id === form.getValues("group"))?.name}</span>
                                         </div>
                                         {form.getValues("pinPost") && (
                                             <div className="bg-neutral-50 p-4 border-b flex justify-between items-center text-orange-600">
@@ -337,11 +345,11 @@ export function MultiStepPostForm({ submitPost, onSuccess }: MultiStepPostFormPr
                                         )}
                                         <div className="bg-primary/5 p-4 flex justify-between items-center">
                                             <span className="text-primary font-bold uppercase tracking-wider text-sm">{t("form.total")}</span>
-                                            <span className="font-extrabold text-xl text-primary">{form.getValues("pinPost") ? "฿250" : "Free"}</span>
+                                            <span className="font-extrabold text-xl text-primary">{form.getValues("pinPost") ? "฿250" : t("form.free")}</span>
                                         </div>
                                     </div>
                                     <div className="text-xs text-center text-muted-foreground flex items-center justify-center gap-2">
-                                        <CreditCard className="w-4 h-4" /> Secure mock payment process
+                                        <CreditCard className="w-4 h-4" /> {t("form.secure_payment_notice")}
                                     </div>
                                 </div>
                             )}
